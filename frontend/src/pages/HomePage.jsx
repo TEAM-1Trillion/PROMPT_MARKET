@@ -1,7 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Star, Download, TrendingUp, Code2, ArrowRight, ShoppingCart, Search } from "lucide-react";
 
 const CATEGORIES = ["전체", "백엔드", "프론트엔드", "DevOps", "코드 리뷰", "마케팅/영업", "데이터", "보안"];
+
+const PROMPTS = [
+  { id: 1, title: "RESTful API 설계 프롬프트 템플릿",  category: "백엔드",     price: 15000, rating: 4.9, reviews: 128, downloads: 234, seller: "김개발",   tags: ["GPT-4", "Claude 3"] },
+  { id: 2, title: "React 컴포넌트 리팩토링 가이드",    category: "프론트엔드", price: 12000, rating: 4.7, reviews: 89,  downloads: 156, seller: "박프론트",  tags: ["GPT-4"] },
+  { id: 3, title: "Docker + K8s 인프라 구성 프롬프트", category: "DevOps",     price: 18000, rating: 4.8, reviews: 67,  downloads: 198, seller: "이데브옵스", tags: ["Claude 3", "GPT-4"] },
+  { id: 4, title: "코드 리뷰 자동화 프롬프트 세트",   category: "코드 리뷰",  price: 9000,  rating: 4.6, reviews: 201, downloads: 312, seller: "최리뷰",    tags: ["GPT-3.5"] },
+  { id: 5, title: "SQL 쿼리 최적화 프롬프트",          category: "백엔드",     price: 11000, rating: 4.5, reviews: 54,  downloads: 87,  seller: "정디비",    tags: ["GPT-4"] },
+  { id: 6, title: "보안 취약점 분석 프롬프트",         category: "보안",       price: 20000, rating: 4.9, reviews: 43,  downloads: 120, seller: "한시큐",    tags: ["Claude 3"] },
+  { id: 7, title: "IT SaaS 제품 출시 및 카피라이팅 작성기", category: "마케팅/영업", price: 13000, rating: 4.7, reviews: 112, downloads: 245, seller: "최마케터",  tags: ["GPT-4", "Claude 3"] },
+  { id: 8, title: "Pandas 데이터 전처리 및 시각화 자동화", category: "데이터",     price: 16000, rating: 4.8, reviews: 75,  downloads: 134, seller: "박사이언스", tags: ["GPT-4"] },
+  { id: 9, title: "Next.js 14 SEO 최적화 가이드라인",     category: "프론트엔드", price: 14000, rating: 4.9, reviews: 92,  downloads: 167, seller: "홍길동",    tags: ["Claude 3"] },
+  { id: 10, title: "CI/CD 배포 파이프라인(Github Actions)", category: "DevOps",    price: 17000, rating: 4.6, reviews: 58,  downloads: 110, seller: "정인프라",  tags: ["GPT-4"] },
+  { id: 11, title: "B2B 기술 영업 제안서 초안 생성기",    category: "마케팅/영업", price: 15500, rating: 4.5, reviews: 41,  downloads: 89,  seller: "이영업",    tags: ["GPT-3.5"] },
+  { id: 12, title: "대용량 로그 분석 및 이상 탐지 프롬프트", category: "데이터",     price: 22000, rating: 4.9, reviews: 34,  downloads: 72,  seller: "강엔지니어", tags: ["Claude 3"] },
+  { id: 13, title: "Legacy 코드(Java) 분석 및 문서화 툴", category: "코드 리뷰",  price: 10500, rating: 4.7, reviews: 145, downloads: 210, seller: "마스터K",   tags: ["GPT-4"] }
+];
 
 const V = "124,58,237";
 const L = "167,139,250";
@@ -22,48 +38,30 @@ const ellipse = (top, left, right, bottom, w, h, color, opacity) => ({
 
 export const HomePage = ({ onSelectPrompt, purchasedPrompts }) => {
   const [activeCategory, setActiveCategory] = useState("전체");
-  const [prompts, setPrompts] = useState([]); // 백엔드로부터 받아올 프롬프트 목록
-  const [searchQuery, setSearchQuery] = useState(""); // 통합 검색어 상태
 
-  // 백엔드 API로부터 프롬프트 목록 가져오기
-  useEffect(() => {
-    const fetchPrompts = async () => {
-      try {
-        const response = await fetch("http://localhost:8080/api/prompts", {
-          method: "GET",
-          credentials: "include", // 인증 쿠키 포함
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setPrompts(data);
-        }
-      } catch (error) {
-        console.error("프롬프트 목록 로드 실패:", error);
-      }
-    };
-    fetchPrompts();
-  }, []);
-
-  // 카테고리 필터링 및 통합 검색창 필터링 동시 적용
-  const filteredPrompts = prompts.filter(p => {
-    const matchesCategory = activeCategory === "전체" || p.category === activeCategory;
-    const matchesSearch = p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (p.tags && p.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase())));
-    return matchesCategory && matchesSearch;
-  });
+  const filtered = activeCategory === "전체"
+      ? PROMPTS
+      : PROMPTS.filter(p => p.category === activeCategory);
 
   return (
       <div className="min-h-screen" style={{ background: "#0b0b12", position: "relative" }}>
 
-        {/* Hero 영역 (배경 스타일 유지) */}
+        {/* Hero 영역 */}
         <section className="relative px-4 pt-16 pb-12 overflow-hidden" style={{ zIndex: 1, background: "#ffffff" }}>
+          {/* 왼쪽 상단 — 진한 보라 */}
           <div style={ellipse("-10%", "-5%", null, null, 800, 300, V, 0.55)} />
+          {/* 오른쪽 상단 — 연한 라벤더 */}
           <div style={ellipse("-15%", null, "-10%", null, 700, 280, L, 0.50)} />
+          {/* 중앙 — 진한 보라, 살짝 아래 */}
           <div style={ellipse("25%", "30%", null, null, 900, 350, V, 0.35)} />
+          {/* 오른쪽 중간 — 연한 라벤더 */}
           <div style={ellipse("20%", null, "-5%", null, 750, 300, L, 0.40)} />
+          {/* 하단 왼쪽 — 페이드아웃용 */}
           <div style={ellipse(null, "-5%", null, "-20%", 600, 250, V, 0.30)} />
+          {/* 하단 오른쪽 — 페이드아웃용 */}
           <div style={ellipse(null, null, "-5%", "-15%", 580, 230, L, 0.28)} />
 
+          {/* 하단 페이드 → #0b0b12 */}
           <div style={{
             position: "absolute",
             bottom: 0, left: 0, right: 0,
@@ -84,20 +82,13 @@ export const HomePage = ({ onSelectPrompt, purchasedPrompts }) => {
                 <span style={{ color: "#462679" }}>AI 프롬프트 마켓</span>
               </h1>
               <p className="mb-6 text-sm" style={{ color: "var(--muted-foreground)" }}>
-                검증된 개발자용 AI 프롬프트<br />
-                GPT, Claude, Gemini 등 모든 AI 모델 지원
+                1,200여 개의 검증된 개발자용 AI 프롬프트<br />
+                GPT &amp; Claude Gemini 등 모든 AI 모델 지원
               </p>
-
-              {/* 🌟 통합된 단일 검색창 */}
               <div className="flex items-center gap-2 p-3 rounded-xl max-w-xl" style={{ background: "var(--card)", border: "1px solid var(--border-lg)" }}>
                 <Search size={16} style={{ color: "#ffffff" }} />
-                <input
-                    className="flex-1 bg-transparent outline-none text-sm"
-                    style={{ color: "#ffffff" }}
-                    placeholder="예) API 설계, 코드 리뷰, Docker..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
+                <input className="flex-1 bg-transparent outline-none text-sm" style={{ color: "#ffffff" }} placeholder="예) API 설계, 코드 리뷰, Docker..." />
+                <button className="px-4 py-1.5 rounded-lg text-sm font-medium text-white" style={{ background: "var(--primary)" }}>검색</button>
               </div>
             </div>
           </div>
@@ -143,10 +134,10 @@ export const HomePage = ({ onSelectPrompt, purchasedPrompts }) => {
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold" style={{ color: "var(--foreground)" }}>인기 프롬프트</h2>
-              <span className="text-sm" style={{ color: "var(--muted-foreground)" }}>{filteredPrompts.length}개</span>
+              <span className="text-sm" style={{ color: "var(--muted-foreground)" }}>{filtered.length}개</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredPrompts.map(prompt => {
+              {filtered.map(prompt => {
                 const isPurchased = purchasedPrompts.includes(prompt.id);
                 return (
                     <button key={prompt.id} onClick={() => onSelectPrompt(prompt.id)} className="text-left rounded-xl overflow-hidden transition-all hover:scale-[1.01]"
@@ -168,7 +159,7 @@ export const HomePage = ({ onSelectPrompt, purchasedPrompts }) => {
                       <div className="p-4">
                         <h3 className="text-sm font-medium leading-snug mb-2" style={{ color: "var(--foreground)" }}>{prompt.title}</h3>
                         <div className="flex items-center gap-1 mb-3">
-                          {prompt.tags && prompt.tags.map(tag => (
+                          {prompt.tags.map(tag => (
                               <span key={tag} className="px-2 py-0.5 rounded text-xs" style={{ background: "var(--muted)", color: "var(--muted-foreground)" }}>{tag}</span>
                           ))}
                         </div>
@@ -178,7 +169,7 @@ export const HomePage = ({ onSelectPrompt, purchasedPrompts }) => {
                             <span className="flex items-center gap-1"><Download size={11} /> {prompt.downloads}</span>
                           </div>
                           <span className="font-semibold text-sm" style={{ color: isPurchased ? "var(--success)" : "var(--brand-violet-light)" }}>
-                            {isPurchased ? "보기" : `${prompt.price ? prompt.price.toLocaleString() : 0}원`}
+                            {isPurchased ? "보기" : `${prompt.price.toLocaleString()}원`}
                           </span>
                         </div>
                       </div>
